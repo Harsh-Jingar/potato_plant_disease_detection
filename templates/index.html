@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potato Plant Disease Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e8d7c;
+            --secondary-color: #045762;
+            --accent-color: #f8bd7f;
+            --light-color: #f7f7f7;
+            --dark-color: #333333;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #f8bd7f;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        .app-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .app-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .header h1 {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+        }
+        
+        .upload-container {
+            flex: 1;
+        }
+        
+        .result-container {
+            flex: 1;
+        }
+        
+        .upload-section {
+            background-color: var(--light-color);
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .upload-section:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .upload-section h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .upload-section i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .upload-section p {
+            color: #777;
+            margin-bottom: 20px;
+        }
+        
+        .custom-file-input {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .custom-file-input input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .custom-file-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--light-color);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .custom-file-input:hover .custom-file-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-analyze {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .btn-analyze:hover, .btn-analyze:focus {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-analyze:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .loading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-color);
+        }
+        
+        .loading p {
+            margin-top: 15px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .result-section {
+            display: none;
+            padding: 25px;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+        
+        .result-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-header h3 {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        .prediction-label {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+        }
+        
+        .prediction-result {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            background-color: var(--light-color);
+        }
+        
+        .prediction-percentage {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+        
+        .confidence-label {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 0;
+        }
+        
+        .disease-info {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: var(--light-color);
+            border-radius: 12px;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .disease-info h4 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .disease-info p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .disease-info ul {
+            padding-left: 20px;
+        }
+        
+        .disease-info li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        @media (max-width: 991px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 25px;
+            }
+            
+            .result-section {
+                margin-top: 30px;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            body {
+                padding: 20px 0;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .header {
+                margin-bottom: 25px;
+            }
+            
+            .prediction-label {
+                font-size: 22px;
+            }
+            
+            .progress-bar {
+                font-size: 0.7rem;
+            }
+        }
+        
+        .highlight-drop {
+            border-color: var(--primary-color);
+            background-color: rgba(78, 141, 124, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="app-title">Potato Plant Disease Detection</h1>
+            <p class="lead">Upload a leaf image to identify diseases and receive treatment recommendations</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-container">
+                <div class="upload-section" id="upload-box">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Upload Leaf Image</h3>
+                    <p>Drag and drop an image or click to select</p>
+                    
+                    <div class="custom-file-input">
+                        <div class="custom-file-btn">
+                            <i class="fas fa-upload me-2"></i> Choose File
+                        </div>
+                        <input type="file" id="file-input" accept="image/*" onchange="previewImage(this);">
+                    </div>
+                    
+                    <div id="image-preview"></div>
+                    
+                    <button id="predict-btn" class="btn btn-analyze" onclick="predictDisease()" disabled>
+                        <i class="fas fa-search me-2"></i> Analyze Image
+                    </button>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Analyzing your plant image...</p>
+                </div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-section" id="result-section">
+                    <div class="result-header">
+                        <h3><i class="fas fa-chart-bar me-2"></i> Analysis Results</h3>
+                    </div>
+                    
+                    <div class="prediction-label" id="prediction-label"></div>
+                    
+                    <div class="prediction-result">
+                        <p class="confidence-label">Confidence Level</p>
+                        <p class="prediction-percentage" id="confidence-percentage">-</p>
+                    </div>
+                    
+                    <div class="disease-info" id="disease-info"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        let selectedFile = null;
+
+        function previewImage(input) {
+            const fileInput = input;
+            const previewContainer = document.getElementById('image-preview');
+            const predictBtn = document.getElementById('predict-btn');
+            
+            if (fileInput.files && fileInput.files[0]) {
+                selectedFile = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+                    predictBtn.disabled = false;
+                }
+                
+                reader.readAsDataURL(selectedFile);
+                
+                // Hide result section if it was shown before
+                document.getElementById('result-section').style.display = 'none';
+            }
+        }
+        
+        function predictDisease() {
+            if (!selectedFile) {
+                alert('Please select an image first');
+                return;
+            }
+            
+            // Show loading spinner
+            document.getElementById('loading').style.display = 'block';
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            // Send the image to the server
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading spinner
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                displayResults(data);
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        }
+        
+        function displayResults(data) {
+            const resultSection = document.getElementById('result-section');
+            const predictionLabel = document.getElementById('prediction-label');
+            const confidencePercentage = document.getElementById('confidence-percentage');
+            const diseaseInfo = document.getElementById('disease-info');
+            
+            // Show result section
+            resultSection.style.display = 'block';
+            
+            // Set prediction label and confidence
+            predictionLabel.textContent = data.prediction;
+            confidencePercentage.textContent = `${data.confidence.toFixed(1)}%`;
+            
+            // Set class color based on prediction
+            if (data.prediction === 'Healthy') {
+                predictionLabel.style.color = 'white';
+                predictionLabel.style.backgroundColor = 'var(--success-color)';
+                confidencePercentage.style.color = 'var(--success-color)';
+            } else {
+                predictionLabel.style.color = 'white';
+                predictionLabel.style.backgroundColor = 'var(--danger-color)';
+                confidencePercentage.style.color = 'var(--danger-color)';
+            }
+            
+            // Display disease information
+            diseaseInfo.innerHTML = '';
+            if (data.prediction === 'Early Blight') {
+                diseaseInfo.style.borderLeftColor = 'var(--danger-color)';
+                diseaseInfo.innerHTML = `
+                    <h4><i class="fas fa-bug me-2"></i> Early Blight Information</h4>
+                    <p><strong>Cause:</strong> Fungus (Alternaria solani)</p>
+                    <p><strong>Symptoms:</strong> Brown spots with concentric rings creating a "target-like" pattern. Often starts on older leaves.</p>
+                    <p><strong>Treatment:</strong></p>
+                    <ul>
+                        <li>Remove infected leaves promptly</li>
+                        <li>Ensure good air circulation between plants</li>
+                        <li>Apply approved fungicides as directed</li>
+                        <li>Practice crop rotation in future plantings</li>
+                        <li>Water at the base of plants to keep foliage dry</li>
+                    </ul>
+                `;
+            } else if (data.prediction === 'Late Blight') {
+                diseaseInfo.style.borderLeftColor = 'var(--danger-color)';
+                diseaseInfo.innerHTML = `
+                    <h4><i class="fas fa-bug me-2"></i> Late Blight Information</h4>
+                    <p><strong>Cause:</strong> Water mold (Phytophthora infestans)</p>
+                    <p><strong>Symptoms:</strong> Dark, water-soaked spots that quickly enlarge. White mold may appear on leaf undersides in humid conditions.</p>
+                    <p><strong>Treatment:</strong></p>
+                    <ul>
+                        <li>Remove infected plants immediately to prevent spread</li>
+                        <li>Apply copper-based fungicides as a preventive measure</li>
+                        <li>Ensure proper spacing between plants for airflow</li>
+                        <li>Avoid overhead watering and watering in the evening</li>
+                        <li>Destroy all infected plant material (do not compost)</li>
+                    </ul>
+                `;
+            } else {
+                diseaseInfo.style.borderLeftColor = 'var(--success-color)';
+                diseaseInfo.innerHTML = `
+                    <h4><i class="fas fa-check-circle me-2"></i> Healthy Plant</h4>
+                    <p>Your potato plant appears to be healthy! Continue these good gardening practices:</p>
+                    <ul>
+                        <li>Maintain consistent watering (avoid overhead irrigation)</li>
+                        <li>Ensure proper spacing between plants for good airflow</li>
+                        <li>Practice crop rotation to prevent soil-borne diseases</li>
+                        <li>Monitor regularly for any signs of disease or pests</li>
+                        <li>Apply balanced fertilizer according to plant needs</li>
+                    </ul>
+                `;
+            }
+        }
+
+        // Add drag and drop functionality
+        const uploadBox = document.getElementById('upload-box');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            uploadBox.classList.add('highlight-drop');
+        }
+        
+        function unhighlight() {
+            uploadBox.classList.remove('highlight-drop');
+        }
+        
+        uploadBox.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files && files.length > 0) {
+                document.getElementById('file-input').files = files;
+                previewImage(document.getElementById('file-input'));
+            }
+        }
+    </script>
+</body>
+</html>
