@@ -53,6 +53,15 @@ The model achieved:
 - Accuracy: ~96% on validation data
 - Loss: ~0.14 on validation data
 
+## Training Result
+![image](https://github.com/user-attachments/assets/bd7e9846-b933-4c65-9f02-0da1168fe85e)
+
+![image](https://github.com/user-attachments/assets/3b72ca55-d259-4e6d-92db-8c89d6823524)
+
+![image](https://github.com/user-attachments/assets/5c07fd33-96a7-4d1e-bb70-f980bb9b211e)
+
+![Screenshot 2025-05-05 143702](https://github.com/user-attachments/assets/03313814-b4a0-42f4-a2a0-338665d54f9b)
+
 ## Installation and Setup
 
 1. Clone this repository:
